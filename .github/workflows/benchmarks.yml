@@ -1,0 +1,107 @@
+name: Benchmark Comparison
+
+on:
+  pull_request:
+    # runs when pr is opened
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  run_benchmarks:
+    # Only run if:
+    #  - the event is a PR being opened, or
+    #  - the event is an issue comment on a PR and the comment starts with "run benchmarks"
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+      startsWith(github.event.comment.body, 'run benchmarks'))
+    runs-on: ubuntu-latest
+
+    steps:
+      # When triggered by comment, fetch corresponding PR info
+      - name: Get PR info for comment trigger
+        id: pr_info
+        # only applies to comment not new pr
+        if: github.event_name == 'issue_comment'
+        # action allows you to interact w/github api directly w/in workflow. fetches dynamic data
+        uses: actions/github-script@v6
+        with:
+          script: |
+            # search repos for
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            return {
+              head: pr.data.head.ref,
+              base: pr.data.base.ref
+            };
+
+      # Set branch variables based on the event type.
+      - name: Set branch variables
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
+            echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+          else
+            echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
+            echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
+          fi
+
+      # Checkout the base (target) branch into a folder called "base"
+      # (temp directories, only exist for duration of workflow run)
+      - name: Checkout base branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+          path: base
+
+      # Checkout the head (PR) branch into a folder called "head"
+      - name: Checkout head branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.HEAD_BRANCH }}
+          path: head
+
+      # Set up Python.
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Run the benchmark on the base branch.
+      # these output files stored temporarily in the runner's workspace during the job's execution.
+      # Once the job completes, the files are removed.
+      - name: Run benchmark on base branch
+        working-directory: base
+        run: python benchmarks.py -o ../results-base.json
+
+      # Run the benchmark on the head branch.
+      - name: Run benchmark on head branch
+        working-directory: head
+        run: python benchmarks.py -o ../results-head.json
+
+      # Compare the two benchmark result files and save the output.
+      - name: Compare benchmarks
+        run: python -m pyperf compare_to results-base.json results-head.json --table > comparison.txt
+
+      # Post the benchmark comparison as a comment on the PR.
+      - name: Post benchmark results as comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('comparison.txt', 'utf8');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## Benchmark Comparison
+              The following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):
+
+              \`\`\`
+              ${output}
+              \`\`\``
+            });
