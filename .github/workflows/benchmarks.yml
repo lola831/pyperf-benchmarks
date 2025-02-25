@@ -71,6 +71,11 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Install pyperf
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyperf
+
       # Run the benchmark on the base branch.
       # these output files stored temporarily in the runner's workspace during the job's execution.
       # Once the job completes, the files are removed.
