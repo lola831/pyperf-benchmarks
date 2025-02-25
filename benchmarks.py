@@ -27,7 +27,7 @@ def benchmark_functions():
     # Define a list of parameter sets for function_a.
     params_for_a = [
         {'n': 1000, 'delay': 0.001},
-        {'n': 5000, 'delay': 0.001},
+        {'n': 5000, 'delay': 0.010},
     ]
 
     # Define a list of parameter sets for function_b.
