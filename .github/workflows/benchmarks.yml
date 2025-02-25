@@ -16,7 +16,8 @@ jobs:
     if: >
       github.event_name == 'pull_request_target' ||
       (github.event_name == 'issue_comment' &&
-      startsWith(github.event.comment.body, 'run benchmarks'))
+      startsWith(github.event.comment.body, 'run benchmarks') &&
+      github.event.issue.pull_request)
     runs-on: ubuntu-latest
     permissions:
       issues: write
