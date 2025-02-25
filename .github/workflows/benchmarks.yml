@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      pull_requests: write
+      pull-requests: write
 
     steps:
       # When triggered by comment, fetch corresponding PR info
