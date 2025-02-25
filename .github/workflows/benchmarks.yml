@@ -54,6 +54,11 @@ jobs:
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
           fi
 
+      - name: Debug environment variables
+        run: |
+          echo "BASE_BRANCH=$BASE_BRANCH"
+          echo "HEAD_BRANCH=$HEAD_BRANCH"
+
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
       - name: Checkout base branch
