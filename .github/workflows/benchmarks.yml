@@ -55,17 +55,23 @@ jobs:
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
       - name: Checkout base branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          repository: ${{ github.repository }}
           ref: ${{ env.BASE_BRANCH }}
           path: base
+          persist-credentials: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Checkout the head (PR) branch into a folder called "head"
       - name: Checkout head branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          repository: ${{ github.repository }}
           ref: ${{ env.HEAD_BRANCH }}
           path: head
+          persist-credentials: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Set up Python.
       - name: Set up Python
