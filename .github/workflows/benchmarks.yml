@@ -32,16 +32,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const core = require('@actions/core');
             const pr = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
             console.log("PR return: " + pr.data.head.ref);
-            return {
-              head: pr.data.head.ref,
-              base: pr.data.base.ref
-            };
+            core.setOutput('head', pr.data.head.ref)
+            core.setOutput('base', pr.data.base.ref)
 
       # Set branch variables based on the event type.
       - name: Set branch variables
@@ -54,16 +53,11 @@ jobs:
             echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
           else
             echo "Using outputs from pr_info:"
-            echo "BASE_BRANCH=${{ github.event.issue_comment.base.ref }}"
+            echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}"
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}"
             echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
           fi
-
-      - name: Debug environment variables
-        run: |
-          echo "BASE_BRANCH=$BASE_BRANCH"
-          echo "HEAD_BRANCH=$HEAD_BRANCH"
 
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
