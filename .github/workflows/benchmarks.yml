@@ -46,9 +46,15 @@ jobs:
       - name: Set branch variables
         run: |
           if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            echo "Using pull_request_target values:"
+            echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}"
+            echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}"
             echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
           else
+            echo "Using outputs from pr_info:"
+            echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}"
+            echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}"
             echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
           fi
