@@ -16,7 +16,7 @@ jobs:
       github.event.issue.pull_request)
 
     steps:
-      # When triggered by comment, fetch corresponding PR info
+      # When triggered by comment, fetch corresponding PR info!
       - name: Get PR info for comment trigger
         id: pr_info
         # only applies to comment not new pr
