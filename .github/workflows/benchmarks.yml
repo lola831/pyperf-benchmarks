@@ -37,6 +37,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
+            console.log("PR return: " + pr.data.head.ref);
             return {
               head: pr.data.head.ref,
               base: pr.data.base.ref
