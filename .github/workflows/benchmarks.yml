@@ -53,7 +53,7 @@ jobs:
             echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
           else
             echo "Using outputs from pr_info:"
-            echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}"
+            echo "BASE_BRANCH=${{ github.event.issue_comment.base.ref }}"
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}"
             echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
