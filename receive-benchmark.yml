@@ -1,26 +1,20 @@
-name: Benchmark Comparison
+# .github/workflows/receive-benchmark.yml
+name: Receive Benchmark
 
 on:
-  # will this be safe enough!!?
-  pull_request_target:
-    # runs when pr is opened
+  pull_request:
     types: [opened]
   issue_comment:
     types: [created]
 
 jobs:
-  run_benchmarks:
-    # Only run if:
-    #  - the event is a PR being opened, or
-    #  - the event is an issue comment on a PR and the comment starts with "run benchmarks"
+  build:
+    runs-on: ubuntu-latest
     if: >
-      github.event_name == 'pull_request_target' ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'issue_comment' &&
       startsWith(github.event.comment.body, 'run benchmarks') &&
       github.event.issue.pull_request)
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
 
     steps:
       # When triggered by comment, fetch corresponding PR info
@@ -37,7 +31,6 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-            console.log("PR return: " + pr.data.head.ref);
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
 
@@ -45,18 +38,17 @@ jobs:
       - name: Set branch variables
         run: |
           if [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            echo "Using pull_request_target values:"
-            echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}"
-            echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}"
             echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
           else
-            echo "Using outputs from pr_info:"
-            echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}"
-            echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}"
             echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
           fi
+
+      - name: Debug environment variables
+        run: |
+          echo "BASE_BRANCH=$BASE_BRANCH"
+          echo "HEAD_BRANCH=$HEAD_BRANCH"
 
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
@@ -66,26 +58,12 @@ jobs:
           ref: ${{ env.BASE_BRANCH }}
           path: base
 
-      - name: Verify base branch checkout
-        run: |
-          cd base
-          echo "Expected base branch: $BASE_BRANCH"
-          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
-          echo "Commit SHA: $(git rev-parse HEAD)"
-
       # Checkout the head (PR) branch into a folder called "head"
       - name: Checkout head branch
         uses: actions/checkout@v4
         with:
           ref: ${{ env.HEAD_BRANCH }}
           path: head
-
-      - name: Verify head branch checkout
-        run: |
-          cd head
-          echo "Expected head branch: $HEAD_BRANCH"
-          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
-          echo "Commit SHA: $(git rev-parse HEAD)"
 
       # Set up Python.
       - name: Set up Python
@@ -115,21 +93,8 @@ jobs:
       - name: Compare benchmarks
         run: python -m pyperf compare_to results-base.json results-head.json --table --table-format=md > comparison.txt
 
-      # Post the benchmark comparison as a comment on the PR.
-      - name: Post benchmark results as comment
-        uses: actions/github-script@v7
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v3
         with:
-          script: |
-            const fs = require('fs');
-            const output = fs.readFileSync('comparison.txt', 'utf8');
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `## Benchmark Comparison
-              The following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):
-
-              \`\`\`
-              ${output}
-              \`\`\``
-            });
+          name: benchmark-results
+          path: comparison.txt
