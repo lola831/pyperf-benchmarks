@@ -66,12 +66,26 @@ jobs:
           ref: ${{ env.BASE_BRANCH }}
           path: base
 
+      - name: Verify base branch checkout
+        run: |
+          cd base
+          echo "Expected base branch: $BASE_BRANCH"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Commit SHA: $(git rev-parse HEAD)"
+
       # Checkout the head (PR) branch into a folder called "head"
       - name: Checkout head branch
         uses: actions/checkout@v4
         with:
           ref: ${{ env.HEAD_BRANCH }}
           path: head
+
+      - name: Verify head branch checkout
+        run: |
+          cd head
+          echo "Expected head branch: $HEAD_BRANCH"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Commit SHA: $(git rev-parse HEAD)"
 
       # Set up Python.
       - name: Set up Python
