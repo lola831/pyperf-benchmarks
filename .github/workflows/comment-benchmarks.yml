@@ -43,6 +43,6 @@ jobs:
               The following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):
 
               \`\`\`
-              ${output}
+              ${result}
               \`\`\``
             });
