@@ -33,7 +33,7 @@ jobs:
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
             core.setOutput('number', pr.data.number)
-            core.setOuput('head_repo', pr.data.head.repo.full_name)
+            core.setOutput('head_repo', pr.data.head.repo.full_name)
 
       # Set branch variables based on the event type.
       - name: Set branch variables
