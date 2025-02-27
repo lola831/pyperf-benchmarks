@@ -32,6 +32,7 @@ jobs:
             });
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
+            core.setOuput('head_repo', pr.data.head.repo.full_name)
 
       # Set branch variables based on the event type.
       - name: Set branch variables
@@ -61,6 +62,9 @@ jobs:
       - name: Checkout head branch
         uses: actions/checkout@v4
         with:
+          # Use the head repository from pr_info output if available (issue_comment event),
+          # otherwise fallback to the pull_request event payload.
+          repository: ${{ steps.pr_info.outputs.head_repo || github.event.pull_request.head.repo.full_name }}
           ref: ${{ env.HEAD_BRANCH }}
           path: head
 
