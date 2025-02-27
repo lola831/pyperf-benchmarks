@@ -32,6 +32,7 @@ jobs:
             });
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
+            core.setOutput('number', pr.data.number)
             core.setOuput('head_repo', pr.data.head.repo.full_name)
 
       # Set branch variables based on the event type.
@@ -40,15 +41,19 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+            echo "${{ github.event.pull_request.number }}" > pr_number.txt
           else
             echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
+            echo "${{ steps.pr_info.outputs.number }}" > pr_number.txt
           fi
 
       - name: Debug environment variables
         run: |
           echo "BASE_BRANCH=$BASE_BRANCH"
           echo "HEAD_BRANCH=$HEAD_BRANCH"
+          echo "PR_NUMBER:"
+          cat pr_number.txt
 
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
@@ -100,4 +105,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
-          path: comparison.txt
+          path: |
+            comparison.txt
+            pr_number.txt
