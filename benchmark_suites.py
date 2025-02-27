@@ -26,7 +26,7 @@ def benchmark_functions():
     # Create an empty list to collect the benchmarks.
     benchmarks = []
 
-    # Define a list of parameter sets for function_a.
+    # Define a list of parameter sets for function_a..
     params_for_a = [
         {'n': 1000, 'delay': 0.001},
         {'n': 5000, 'delay': 0.001},
