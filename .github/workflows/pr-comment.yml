@@ -86,7 +86,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.pull_request.number || steps.pr_info.outputs.number }}
-          BODY: >
+          BODY: |
             ## Benchmark Comparison
             The following table compares the benchmarks from **${BASE_BRANCH}** (target) and **${HEAD_BRANCH}** (PR branch):
             $(cat comparison.txt)
