@@ -10,7 +10,8 @@ on:
 jobs:
   post_comment:
     runs-on: ubuntu-latest
-
+    permissions:
+      pull-requests: write
     # permissions:
     #   issues: write
     #   contents: read
