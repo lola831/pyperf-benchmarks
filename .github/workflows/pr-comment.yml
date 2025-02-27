@@ -80,13 +80,24 @@ jobs:
       - name: Compare Benchmarks
         run: python -m pyperf compare_to results-base.json results-head.json --table --table-format=md > comparison.txt
 
+      - name: Generate Comment Body
+        id: generate_body
+        run: |
+          body="## Benchmark Comparison
+          The following table compares the benchmarks from **${BASE_BRANCH}** (target) and **${HEAD_BRANCH}** (PR branch):
+          $(cat comparison.txt)"
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          BASE_BRANCH: ${{ env.BASE_BRANCH }}
+          HEAD_BRANCH: ${{ env.HEAD_BRANCH }}
+
+
       - name: Post Benchmark Results as PR Comment
         run: gh pr comment "$NUMBER" --body "$BODY"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.pull_request.number || steps.pr_info.outputs.number }}
-          BODY: |
-            ## Benchmark Comparison
-            The following table compares the benchmarks from **${BASE_BRANCH}** (target) and **${HEAD_BRANCH}** (PR branch):
-            $(cat comparison.txt)
+          BODY: ${{ steps.generate_body.outputs.body }}
