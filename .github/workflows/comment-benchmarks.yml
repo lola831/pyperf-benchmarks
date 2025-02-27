@@ -22,6 +22,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: benchmark-results
+          merge-multiple: true
+          path: .
 
       - name: Determine PR number
         run: |
