@@ -3,7 +3,7 @@ import functools
 import pyperf
 
 # First function: Computes the sum of numbers up to n,
-# with an artificial delay to simulate workload.
+# with an artificial delay to simulate workload..
 def function_a(n, delay):
     # Simulate work by sleeping for a given delay.
     time.sleep(delay)
