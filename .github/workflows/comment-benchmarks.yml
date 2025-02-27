@@ -23,7 +23,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine PR number
+      - name: Determine PR number/info
         id: pr_number
         run: |
           PR_NUM=$(cat pr_number.txt)
