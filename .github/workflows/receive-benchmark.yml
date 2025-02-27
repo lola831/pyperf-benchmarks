@@ -42,10 +42,14 @@ jobs:
             echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
             echo "${{ github.event.pull_request.number }}" > pr_number.txt
+            echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" > branch_info.txt
+            echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> branch_info.txt
           else
             echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
             echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
             echo "${{ steps.pr_info.outputs.number }}" > pr_number.txt
+            echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" > branch_info.txt
+            echo "HEAD_BRANCH=${{ steps.pr_info.outputs.head }}" >> branch_info.txt
           fi
 
       - name: Debug environment variables
@@ -54,6 +58,8 @@ jobs:
           echo "HEAD_BRANCH=$HEAD_BRANCH"
           echo "PR_NUMBER:"
           cat pr_number.txt
+          echo "Branch info:"
+          cat branch_info.txt
 
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
@@ -108,3 +114,4 @@ jobs:
           path: |
             comparison.txt
             pr_number.txt
+            branch_info.txt
