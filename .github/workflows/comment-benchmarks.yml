@@ -1,0 +1,55 @@
+# .github/workflows/comment-benchmark.yml
+name: Comment on Benchmark
+
+on:
+  workflow_run:
+    workflows: ["Receive Benchmark"]
+    types:
+      - completed
+
+jobs:
+  post_comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download benchmark artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results
+          merge-multiple: true
+          path: .
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine PR number/info
+        id: pr_number
+        run: |
+          PR_NUM=$(cat pr_number.txt)
+          echo "PR_NUMBER=$PR_NUM" >> $GITHUB_ENV
+          echo "PR_NUMBER is $PR_NUM"
+          BASE=$(grep "BASE_BRANCH" branch_info.txt | cut -d'=' -f2)
+          HEAD=$(grep "HEAD_BRANCH" branch_info.txt | cut -d'=' -f2)
+          echo "BASE_BRANCH=$BASE" >> $GITHUB_ENV
+          echo "HEAD_BRANCH=$HEAD" >> $GITHUB_ENV
+          echo "BASE_BRANCH is $BASE and HEAD_BRANCH is $HEAD"
+
+      - name: Post benchmark comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const result = fs.readFileSync('comparison.txt', 'utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(process.env.PR_NUMBER),
+              body: `## Benchmark Comparison
+              The following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):
+
+              \`\`\`
+              ${result}
+              \`\`\``
+            });
