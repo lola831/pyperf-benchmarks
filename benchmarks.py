@@ -12,7 +12,7 @@ def function_a(n, delay):
     return result
 
 # Second function: Computes the factorial of n,
-# with an artificial delay to simulate workload.
+# with an artificial delay to simulate workload..
 def function_b(n, delay):
     time.sleep(delay)
     result = 1
