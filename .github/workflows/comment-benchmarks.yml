@@ -10,6 +10,7 @@ on:
 jobs:
   post_comment:
     runs-on: ubuntu-latest
+
     permissions:
       issues: write
       contents: read
@@ -18,8 +19,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: benchmark-results
-          merge-multiple: true
           path: .
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Determine PR number
         run: |
