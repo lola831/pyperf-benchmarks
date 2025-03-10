@@ -39,7 +39,7 @@ jobs:
         id: create_check_run
         uses: actions/github-script@v7
         with:
-          # head_sha is currently on last commit of the pr branch, NOT the last commit of the merged temporary commit, is this okay?
+          # head_sha is currently on last commit of the pr branch, NOT the last commit of the merged temporary commit, is this okay??
           script: |
             const headSha = "${{ steps.pr_info.outputs.head_sha }}";
             const checkRun = await github.rest.checks.create({
@@ -97,7 +97,7 @@ jobs:
           cat benchmark_info.json
 
       # Checkout the base (target) branch into a folder called "base"
-      # (temp directories, only exist for duration of workflow run)
+      # (temp directories, only exist for duration of workflow run))
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
