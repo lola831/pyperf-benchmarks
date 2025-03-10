@@ -41,7 +41,7 @@ jobs:
         with:
           # head_sha is currently on last commit of the pr branch, NOT the last commit of the merged temporary commit, is this okay?
           script: |
-            const headSha = "${{ steps.pr_details.outputs.head_sha }}";
+            const headSha = "${{ steps.pr_info.outputs.head_sha }}";
             const checkRun = await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
