@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      checks: write
     steps:
       - name: Download benchmark artifact
         uses: actions/download-artifact@v4
         with:
           name: benchmark-results
-          merge-multiple: true
           path: .
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -53,3 +53,28 @@ jobs:
               ${result}
               \`\`\``
             });
+      - name: Complete Benchmark Check Run
+        if: test -f check_run_id.txt
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const checkRunId = fs.readFileSync('check_run_id.txt', 'utf8').trim();
+            let summary = 'Benchmark run completed successfully.';
+            if (fs.existsSync('comparison.txt')) {
+              summary = fs.readFileSync('comparison.txt', 'utf8');
+            }
+            await github.rest.checks.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              check_run_id: Number(checkRunId),
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              conclusion: 'success',
+              output: {
+                title: 'Benchmark Run Completed',
+                summary: summary
+              }
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
