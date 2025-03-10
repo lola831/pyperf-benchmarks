@@ -58,23 +58,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Debug ISSUE Event Info
-      #   if: github.event_name == 'issue_comment'
-      #   run: |
-      #     echo "DEBUG ISSUE COMMENT :"
-      #     echo "  pr number: ${{ github.event.issue.number }}"
-      #     echo "Merge ref: refs/pull/${{ github.event.issue.number }}/merge"
-
-      # - name: Debug PR Event Info
-      #   if: github.event_name == 'pull_request'
-      #   run: |
-      #     echo "Pull Request Event:"
-      #     echo "  Base branch: ${{ github.event.pull_request.base.ref }}"
-      #     echo "  Head branch: ${{ github.event.pull_request.head.ref }}"
-      #     echo "  PR number: ${{ github.event.pull_request.number }}"
-      #     echo "  Head commit SHA: ${{ github.event.pull_request.head.sha }}"
-
-
       - name: Set branch variables and generate benchmark_info.json
         run: |
           set -e
@@ -104,14 +87,14 @@ jobs:
           echo "Generated benchmark_info.json:"
           cat benchmark_info.json
 
-      - name: Debug environment variables
+      - name: Debug benchmark info
         run: |
-          echo "BASE_BRANCH=$BASE_BRANCH"
-          echo "HEAD_BRANCH=$HEAD_BRANCH"
-          echo "PR_NUMBER:"
-          cat pr_number.txt
-          echo "Branch info:"
-          cat branch_info.txt
+          echo "DEBUG: BASE_BRANCH = $BASE_BRANCH"
+          echo "DEBUG: HEAD_BRANCH = $HEAD_BRANCH"
+          echo "DEBUG: PR_NUMBER = $PR_NUMBER"
+          echo "DEBUG: CHECK_RUN_ID = $CHECK_RUN_ID"
+          echo "Contents of benchmark_info.json:"
+          cat benchmark_info.json
 
       # Checkout the base (target) branch into a folder called "base"
       # (temp directories, only exist for duration of workflow run)
