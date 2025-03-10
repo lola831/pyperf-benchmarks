@@ -153,4 +153,10 @@ jobs:
             comparison.txt
             pr_number.txt
             branch_info.txt
-            check_run_id.txt
+
+      - name: Upload check run ID artifact
+        if: ${{ github.event_name == 'issue_comment' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-check-run
+          path: check_run_id.txt
