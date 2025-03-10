@@ -31,7 +31,7 @@ jobs:
               name: 'Benchmark Run',
               head_sha: context.sha,
               status: 'in_progress',
-              started_at: new Dat().toISOString(),
+              started_at: new Date().toISOString(),
               output: {
                 title:'Benchmark Run Started',
                 summary: 'Benchmarks are running...'
