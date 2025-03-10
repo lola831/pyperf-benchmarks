@@ -97,7 +97,7 @@ jobs:
           cat benchmark_info.json
 
       # Checkout the base (target) branch into a folder called "base"
-      # (temp directories, only exist for duration of workflow run)
+      # (temp directories, only exist for duration of workflow run))
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
