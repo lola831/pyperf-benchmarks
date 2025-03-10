@@ -27,7 +27,7 @@ jobs:
           script: |
             const checkRun = await github.rest.checks.create({
               owner: context.repo.owner,
-              repo: contect.repo.repo,
+              repo: context.repo.repo,
               name: 'Benchmark Run',
               head_sha: context.sha,
               status: 'in_progress',
