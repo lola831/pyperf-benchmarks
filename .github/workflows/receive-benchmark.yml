@@ -108,7 +108,7 @@ jobs:
       - name: Checkout head branch (merged)
         uses: actions/checkout@v4
         with:
-          # this branch has everything on target branch at time event triggered with pr branch merged in
+          # this branch has everything on target branch at time event triggered with pr branch merged inn
           ref: refs/pull/${{ env.PR_NUMBER }}/merge
           path: head
 
