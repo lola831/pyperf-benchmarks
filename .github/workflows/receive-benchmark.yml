@@ -32,7 +32,7 @@ jobs:
             });
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
-            core.setOuput('head_sha', pr.data.head.sha)
+            core.setOutput('head_sha', pr.data.head.sha)
 
       - name: Create Benchmark Check Run (In Progress)
         if: github.event_name == 'issue_comment'
