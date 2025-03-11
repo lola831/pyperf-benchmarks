@@ -64,7 +64,6 @@ jobs:
 
       - name: Wait for upstream workflow to complete
         id: wait
-        if: github.event.workflow_run.event == 'issue_comment'
         run: |
           RUN_ID=${{ github.event.workflow_run.id }}
           echo "Waiting for upstream workflow run $RUN_ID to complete..."
