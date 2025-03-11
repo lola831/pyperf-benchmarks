@@ -46,34 +46,6 @@ jobs:
             });
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
-<<<<<<< Updated upstream
-            core.setOutput('head_sha', pr.data.head.sha)
-
-      - name: Create Benchmark Check Run (In Progress)
-        if: github.event_name == 'issue_comment'
-        id: create_check_run
-        uses: actions/github-script@v7
-        with:
-          # head_sha is currently on last commit of the pr branch, NOT the last commit of the merged temporary commit, is this okay?
-          script: |
-            const headSha = "${{ steps.pr_info.outputs.head_sha }}";
-            const checkRun = await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Benchmark Run',
-              head_sha: headSha,
-              status: 'in_progress',
-              started_at: new Date().toISOString(),
-              output: {
-                title:'Benchmark Run Started',
-                summary: 'Benchmarks are running...'
-              }
-            });
-            core.setOutput('check_run_id', checkRun.data.id);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-=======
->>>>>>> Stashed changes
 
       - name: Set branch variables and generate benchmark_info.json
         run: |
