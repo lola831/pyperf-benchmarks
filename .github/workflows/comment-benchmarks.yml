@@ -29,6 +29,13 @@ jobs:
             sleep 10
           done
 
+      - name: Download comment id artifact
+        if: github.event.workflow_run.event == 'issue_comment'
+        uses: actions/download-artifact@v4
+        with:
+          name: comment-id
+          path: .
+
       - name: Get Comment Id
         if: github.event.workflow_run.event == 'issue_comment'
         id: get_comment_id
