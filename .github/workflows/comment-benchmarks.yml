@@ -4,8 +4,7 @@ name: Comment on Benchmark
 on:
   workflow_run:
     workflows: ["Receive Benchmark"]
-    types:
-      - completed
+    types: [in_progress]
 
 jobs:
   post_comment:
@@ -14,6 +13,73 @@ jobs:
       pull-requests: write
       checks: write
     steps:
+      - name: Wait for artifact to be available
+        if: github.event.workflow_run.event == 'issue_comment'
+        run: |
+          ARTIFACT_NAME="comment-id"
+          while true; do
+            ARTIFACTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts")
+            FOUND=$(echo "$ARTIFACTS" | jq -r --arg NAME "$ARTIFACT_NAME" '.artifacts[] | select(.name==$NAME) | .id')
+            if [ -n "$FOUND" ]; then
+              echo "Artifact '$ARTIFACT_NAME' is available with id: $FOUND"
+              break
+            else
+              echo "Artifact '$ARTIFACT_NAME' not yet available; waiting..."
+            fi
+            sleep 10
+          done
+
+      - name: Get Comment Id
+        if: github.event.workflow_run.event == 'issue_comment'
+        id: get_comment_id
+        run: |
+          COMMENT_ID=$(cat comment_id.txt)
+          echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
+          echo "Parsed comment_id.txt: COMMENT_ID=$COMMENT_ID"
+
+      - name: Append to initial comment to indicate benchmarks have started
+        if: github.event.workflow_run.event == 'issue_comment'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commentId = Number(process.env.COMMENT_ID);
+            // Retrieve the current comment body.
+            const { data: existingComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: commentId
+            });
+            const currentBody = existingComment.body;
+            // Append the new message.
+            const appendedText = "\n🚀 Benchmarks have started.";
+            const newBody = currentBody + appendedText;
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: commentId,
+              body: newBody
+            });
+
+
+      - name: Wait for upstream workflow to complete
+        id: wait
+        if: github.event.workflow_run.event == 'issue_comment'
+        run: |
+          RUN_ID=${{ github.event.workflow_run.id }}
+          echo "Waiting for upstream workflow run $RUN_ID to complete..."
+          # Poll every 10 seconds until status becomes 'completed'
+          while true; do
+            STATUS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs/$RUN_ID" | jq -r '.status')
+            echo "Current upstream status: $STATUS"
+            if [ "$STATUS" = "completed" ]; then
+              echo "Upstream workflow run completed."
+              break
+            fi
+            sleep 10
+          done
+
       - name: Download benchmark artifact
         uses: actions/download-artifact@v4
         with:
@@ -59,26 +125,24 @@ jobs:
               \`\`\``
             });
 
-      - name: Complete Benchmark Check Run
-        if: ${{ env.CHECK_RUN_ID != '' }}
+      - name: Append to comment to indicate benchmarks have completed
+        if: github.event.workflow_run.event == 'issue_comment'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            let summary = 'Benchmark run completed successfully.';
-            if (fs.existsSync('comparison.txt')) {
-              summary = fs.readFileSync('comparison.txt', 'utf8');
-            }
-            await github.rest.checks.update({
+            const commentId = Number(process.env.COMMENT_ID);
+            // Retrieve the current comment body.
+            const { data: existingComment } = await github.rest.issues.getComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              check_run_id: Number(process.env.CHECK_RUN_ID),
-              status: 'completed',
-              completed_at: new Date().toISOString(),
-              conclusion: 'success',
-              output: {
-                title: 'Benchmark Run Completed',
-                summary: summary
-              }
+              comment_id: commentId
+            });
+            const appendedText = "\n✅ Benchmarks have completed running, and results have been posted.";
+            const newBody = existingComment.body + appendedText;
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: commentId,
+              body: newBody
             });

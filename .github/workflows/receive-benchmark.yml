@@ -9,8 +9,6 @@ on:
 jobs:
   run-benchmarks:
     runs-on: ubuntu-latest
-    permissions:
-      checks: write
     if: >
       (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
       (github.event_name == 'issue_comment' &&
@@ -18,6 +16,22 @@ jobs:
       github.event.issue.pull_request)
 
     steps:
+      - name: Get Comment Id
+        if: github.event_name == 'issue_comment'
+        run: |
+          COMMENT_ID="${{ github.event.comment.id }}"
+          echo "$COMMENT_ID" > comment_id.txt
+          echo "Generated comment_id.txt:"
+          cat comment_id.txt
+
+      - name: Upload Comment Id
+        if: github.event_name == 'issue_comment'
+        uses: actions/upload-artifact@v4
+        with:
+          name: comment-id
+          path: comment_id.txt
+
+
       # Fetch PR details when triggered by an issue comment (not available in the event payload)
       - name: Fetch PR Details
         id: pr_info
@@ -32,6 +46,7 @@ jobs:
             });
             core.setOutput('head', pr.data.head.ref)
             core.setOutput('base', pr.data.base.ref)
+<<<<<<< Updated upstream
             core.setOutput('head_sha', pr.data.head.sha)
 
       - name: Create Benchmark Check Run (In Progress)
@@ -57,6 +72,8 @@ jobs:
             core.setOutput('check_run_id', checkRun.data.id);
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+=======
+>>>>>>> Stashed changes
 
       - name: Set branch variables and generate benchmark_info.json
         run: |
@@ -65,12 +82,10 @@ jobs:
             BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
             HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
             PR_NUMBER="${{ github.event.pull_request.number }}"
-            CHECK_RUN_ID=""
           else
             BASE_BRANCH="${{ steps.pr_info.outputs.base }}"
             HEAD_BRANCH="${{ steps.pr_info.outputs.head }}"
             PR_NUMBER="${{ github.event.issue.number }}"
-            CHECK_RUN_ID="${{ steps.create_check_run.outputs.check_run_id }}"
           fi
           echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
           echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
@@ -80,8 +95,7 @@ jobs:
           {
             "pr_number": "$PR_NUMBER",
             "base_branch": "$BASE_BRANCH",
-            "head_branch": "$HEAD_BRANCH",
-            "check_run_id": "$CHECK_RUN_ID"
+            "head_branch": "$HEAD_BRANCH"
           }
           EOF
           echo "Generated benchmark_info.json:"
@@ -92,7 +106,6 @@ jobs:
           echo "DEBUG: BASE_BRANCH = $BASE_BRANCH"
           echo "DEBUG: HEAD_BRANCH = $HEAD_BRANCH"
           echo "DEBUG: PR_NUMBER = $PR_NUMBER"
-          echo "DEBUG: CHECK_RUN_ID = $CHECK_RUN_ID"
           echo "Contents of benchmark_info.json:"
           cat benchmark_info.json
 
