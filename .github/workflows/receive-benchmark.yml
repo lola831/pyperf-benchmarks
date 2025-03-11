@@ -32,7 +32,7 @@ jobs:
           path: comment_id.txt
 
 
-      # Fetch PR details when triggered by an issue comment (not available in the event payload)
+      # Fetch PR details when triggered by an issue comment (not available in the event payload)!
       - name: Fetch PR Details
         id: pr_info
         if: github.event_name == 'issue_comment'
