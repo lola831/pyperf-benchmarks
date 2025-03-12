@@ -1,7 +1,7 @@
-name: Receive Benchmark
+name: Run Benchmarks
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened]
   issue_comment:
     types: [created]
@@ -10,28 +10,12 @@ jobs:
   run-benchmarks:
     runs-on: ubuntu-latest
     if: >
-      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.draft == false) ||
       (github.event_name == 'issue_comment' &&
       startsWith(github.event.comment.body, 'run benchmarks') &&
       github.event.issue.pull_request)
 
     steps:
-      - name: Get Comment Id
-        if: github.event_name == 'issue_comment'
-        run: |
-          COMMENT_ID="${{ github.event.comment.id }}"
-          echo "$COMMENT_ID" > comment_id.txt
-          echo "Generated comment_id.txt:"
-          cat comment_id.txt
-
-      - name: Upload Comment Id
-        if: github.event_name == 'issue_comment'
-        uses: actions/upload-artifact@v4
-        with:
-          name: comment-id
-          path: comment_id.txt
-
-
       # Fetch PR details when triggered by an issue comment (not available in the event payload)
       - name: Fetch PR Details
         id: pr_info
@@ -50,7 +34,7 @@ jobs:
       - name: Set branch variables and generate benchmark_info.json
         run: |
           set -e
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
             BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
             HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
             PR_NUMBER="${{ github.event.pull_request.number }}"
