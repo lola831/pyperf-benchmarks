@@ -2,7 +2,7 @@ name: Post Benchmark Results
 
 on:
   workflow_run:
-    workflows: ["Run Benchmarks", "Benchmark Start Comment"]
+    workflows: ["Run Benchmarks"]
     types: [completed]
 
 jobs:
