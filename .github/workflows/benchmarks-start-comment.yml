@@ -12,7 +12,7 @@ jobs:
     permissions:
       issues: write
     #   pull-requests: write ????
-    #   issues: write ????
+    #   issues: write ?????
     steps:
       - name: Post start comment and capture ID
         id: post_comment
