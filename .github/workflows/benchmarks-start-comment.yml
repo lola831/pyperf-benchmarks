@@ -39,7 +39,7 @@ jobs:
         run: echo "${{ steps.post_comment.outputs.comment_id }}" > comment_id.txt
 
       - name: Upload comment ID artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: comment-id
           path: comment_id.txt
