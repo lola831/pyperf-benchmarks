@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-    #   issues: write ???
+    #   issues: write ????
     steps:
       - name: Print event payload
         run: cat $GITHUB_EVENT_PATH
