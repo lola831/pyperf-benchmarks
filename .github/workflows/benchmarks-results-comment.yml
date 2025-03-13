@@ -12,23 +12,8 @@ jobs:
       pull-requests: write
     #   issues: write ???
     steps:
-      - name: Download comment id artifact
-        if: github.event.workflow_run.event == 'issue_comment'
-        uses: actions/download-artifact@v4
-        with:
-          name: comment-id
-          path: .
-          repository: ${{ github.repository }}
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get Comment Id
-        if: github.event.workflow_run.event == 'issue_comment'
-        id: get_comment_id
-        run: |
-          COMMENT_ID=$(cat comment_id.txt)
-          echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
-          echo "Parsed comment_id.txt: COMMENT_ID=$COMMENT_ID"
+      - name: Print event payload
+        run: cat $GITHUB_EVENT_PATH
 
       - name: Download benchmark artifact
         uses: actions/download-artifact@v4
@@ -45,54 +30,64 @@ jobs:
           PR_NUMBER=$(jq -r '.pr_number' benchmark_info.json)
           BASE_BRANCH=$(jq -r '.base_branch' benchmark_info.json)
           HEAD_BRANCH=$(jq -r '.head_branch' benchmark_info.json)
-          CHECK_RUN_ID=$(jq -r '.check_run_id' benchmark_info.json)
           echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
           echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
           echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
-          echo "CHECK_RUN_ID=$CHECK_RUN_ID" >> $GITHUB_ENV
           echo "Parsed benchmark_info.json:"
           echo "PR_NUMBER=$PR_NUMBER"
           echo "BASE_BRANCH=$BASE_BRANCH"
           echo "HEAD_BRANCH=$HEAD_BRANCH"
-          echo "CHECK_RUN_ID=$CHECK_RUN_ID"
 
-      - name: Post benchmark comment
+      - name: Read benchmark results
+        id: read_results
+        run: |
+          RESULT=$(cat comparison.txt)
+          echo "RESULT<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESULT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check if trigger was issue_comment and get Comment ID
+        id: maybe_comment_id
+        if: github.event.workflow_run.event == 'issue_comment'
+        run: |
+          echo "This workflow was triggered by an issue_comment event."
+          # Download comment-id artifact to get the existing comment id.
+          echo "Downloading comment-id artifact..."
+          # (Assumes the artifact is available; if not, you might add a wait loop similar to the previous workflow.)
+          COMMENT_ID=$(cat comment_id.txt)
+          echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
+          echo "::set-output name=comment_id::$COMMENT_ID"
+
+      - name: Post or update benchmark comment
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const result = fs.readFileSync('comparison.txt', 'utf8');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: Number(process.env.PR_NUMBER),
-              body: `## Benchmark Comparison
-              The following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):
-
-              \`\`\`
-              ${result}
-              \`\`\``
-            });
-
-      - name: Append to comment to indicate benchmarks have completed
-        if: github.event.workflow_run.event == 'issue_comment'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (process.env.COMMENT_ID) {
+            // Update the existing comment.
             const commentId = Number(process.env.COMMENT_ID);
-            // Retrieve the current comment body.
             const { data: existingComment } = await github.rest.issues.getComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: commentId
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: commentId
             });
-            const appendedText = "\n✅ Benchmarks have completed running, and results have been posted.";
+            const appendedText = `\n\n✅ Benchmarks have completed. \n\n## Benchmark Comparison\nThe following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):\n\n\`\`\`\n${result}\n\`\`\``;
             const newBody = existingComment.body + appendedText;
             await github.rest.issues.updateComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: commentId,
-              body: newBody
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: commentId,
+                body: newBody
             });
+            } else {
+            // Post a new comment if no COMMENT_ID is present.
+            await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `## Benchmark Comparison\nThe following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):\n\n\`\`\`\n${result}\n\`\`\`\n\n✅ Benchmarks have completed.`
+            });
+            }
