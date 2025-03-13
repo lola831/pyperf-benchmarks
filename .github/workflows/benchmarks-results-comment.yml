@@ -24,6 +24,23 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download comment id
+        if: github.event.workflow_run.event == 'issue_comment'
+        uses: actions/download-artifact@v4
+        with:
+          name: comment-id
+          path: .
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Comment Id
+        if: github.event.workflow_run.event == 'issue_comment'
+        run: |
+          COMMENT_ID=$(cat comment_id.txt)
+          echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
+          echo "Extracted COMMENT_ID: $COMMENT_ID"
+
       - name: Parse benchmark_info.json
         id: parse_info
         run: |
@@ -45,18 +62,6 @@ jobs:
           echo "RESULT<<EOF" >> $GITHUB_OUTPUT
           echo "$RESULT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Check if trigger was issue_comment and get Comment ID
-        id: maybe_comment_id
-        if: github.event.workflow_run.event == 'issue_comment'
-        run: |
-          echo "This workflow was triggered by an issue_comment event."
-          # Download comment-id artifact to get the existing comment id.
-          echo "Downloading comment-id artifact..."
-          # (Assumes the artifact is available; if not, you might add a wait loop similar to the previous workflow.)
-          COMMENT_ID=$(cat comment_id.txt)
-          echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
-          echo "::set-output name=comment_id::$COMMENT_ID"
 
       - name: Post or update benchmark comment
         uses: actions/github-script@v7
