@@ -54,13 +54,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const commentId = parseInt("${{ steps.read_comment_id.outputs.comment_id }}");
+            const spinner = "![spinner](https://github.com/lola831/pyperf-benchmarks/blob/main/Spinner@1x-1.0s-200px-200px.gif)";
             // Retrieve the current comment content
             const { data: existingComment } = await github.rest.issues.getComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: commentId
             });
-            const appendedText = "\n🚀 Benchmarks have started.";
+            const appendedText = "\n${spinner} Benchmarks have started...";
             const newBody = existingComment.body + appendedText;
             await github.rest.issues.updateComment({
               owner: context.repo.owner,

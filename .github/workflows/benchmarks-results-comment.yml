@@ -79,8 +79,9 @@ jobs:
                 repo: context.repo.repo,
                 comment_id: commentId
             });
+            let updatedBody = existingComment.body.replace(/!\[spinner\]\(.*?\)/, "");
             const appendedText = `\n\n✅ Benchmarks have completed. \n\n## Benchmark Comparison\nThe following table compares the benchmarks from **${process.env.BASE_BRANCH}** (target) and **${process.env.HEAD_BRANCH}** (PR branch):\n\n\`\`\`\n${result}\n\`\`\``;
-            const newBody = existingComment.body + appendedText;
+            const newBody = updatedBody + appendedText;
             await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
