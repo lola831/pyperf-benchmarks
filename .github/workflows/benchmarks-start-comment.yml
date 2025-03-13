@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-    #   pull-requests: write ?????
+    #   pull-requests: write ??????
     #   issues: write ????
     steps:
       - name: Print event payload
@@ -69,5 +69,3 @@ jobs:
               comment_id: commentId,
               body: newBody
             });
-
-    
