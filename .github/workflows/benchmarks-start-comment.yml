@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-    #   pull-requests: write ?????
-    #   issues: write ????
+      pull-requests: write
     steps:
       - name: Print event payload
         run: cat $GITHUB_EVENT_PATH
@@ -69,5 +68,3 @@ jobs:
               comment_id: commentId,
               body: newBody
             });
-
-    
