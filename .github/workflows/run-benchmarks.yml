@@ -12,7 +12,7 @@ jobs:
       startsWith(github.event.comment.body, 'run benchmarks') &&
       (github.event.comment.author_association == 'OWNER' ||
       github.event.comment.author_association == 'MEMBER')
-    #   member might not be admin with write permissions!!
+    #   member might not be admin with write permissions!!?
     steps:
       - name: Print event payload
         run: cat $GITHUB_EVENT_PATH
