@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     # if: >
     #   (github.event_name == 'issue_comment' &&
-    #   startsWith(github.event.comment.body, 'run benchmarks') &&
+    #   startsWith(github.event.comment.body, 'run benchmarks') &&k
     #   github.event.issue.pull_request)
 
     steps:
