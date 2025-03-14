@@ -1,132 +1,129 @@
 name: Run Benchmarks
 
 on:
-  pull_request_target:
-    types: [opened]
   issue_comment:
     types: [created]
 
 jobs:
   run-benchmarks:
     runs-on: ubuntu-latest
-    if: >
-      (github.event_name == 'pull_request_target' && github.event.pull_request.draft == false) ||
-      (github.event_name == 'issue_comment' &&
-      startsWith(github.event.comment.body, 'run benchmarks') &&
-      github.event.issue.pull_request)
+    # if: >
+    #   (github.event_name == 'issue_comment' &&
+    #   startsWith(github.event.comment.body, 'run benchmarks') &&
+    #   github.event.issue.pull_request)
 
     steps:
       - name: Print event payload
         run: cat $GITHUB_EVENT_PATH
-        
-      - name: Get Comment Id
-        if: github.event_name == 'issue_comment'
-        run: |
-          COMMENT_ID="${{ github.event.comment.id }}"
-          echo "$COMMENT_ID" > comment_id.txt
-          echo "Generated comment_id.txt:"
-          cat comment_id.txt
 
-      - name: Upload Comment Id
-        if: github.event_name == 'issue_comment'
-        uses: actions/upload-artifact@v4
-        with:
-          name: comment-id
-          path: comment_id.txt
+    #   - name: Get Comment Id
+    #     if: github.event_name == 'issue_comment'
+    #     run: |
+    #       COMMENT_ID="${{ github.event.comment.id }}"
+    #       echo "$COMMENT_ID" > comment_id.txt
+    #       echo "Generated comment_id.txt:"
+    #       cat comment_id.txt
 
-      # Fetch PR details when triggered by an issue comment (not available in the event payload)
-      - name: Fetch PR Details
-        id: pr_info
-        if: github.event_name == 'issue_comment'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-            core.setOutput('head', pr.data.head.ref)
-            core.setOutput('base', pr.data.base.ref)
+    #   - name: Upload Comment Id
+    #     if: github.event_name == 'issue_comment'
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: comment-id
+    #       path: comment_id.txt
 
-      - name: Set branch variables and generate benchmark_info.json
-        run: |
-          set -e
-          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-            HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-          else
-            BASE_BRANCH="${{ steps.pr_info.outputs.base }}"
-            HEAD_BRANCH="${{ steps.pr_info.outputs.head }}"
-            PR_NUMBER="${{ github.event.issue.number }}"
-          fi
-          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
-          echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+    #   # Fetch PR details when triggered by an issue comment (not available in the event payload)
+    #   - name: Fetch PR Details
+    #     id: pr_info
+    #     if: github.event_name == 'issue_comment'
+    #     uses: actions/github-script@v7
+    #     with:
+    #       script: |
+    #         const pr = await github.rest.pulls.get({
+    #           owner: context.repo.owner,
+    #           repo: context.repo.repo,
+    #           pull_number: context.issue.number
+    #         });
+    #         core.setOutput('head', pr.data.head.ref)
+    #         core.setOutput('base', pr.data.base.ref)
 
-          cat <<EOF > benchmark_info.json
-          {
-            "pr_number": "$PR_NUMBER",
-            "base_branch": "$BASE_BRANCH",
-            "head_branch": "$HEAD_BRANCH"
-          }
-          EOF
-          echo "Generated benchmark_info.json:"
-          cat benchmark_info.json
+    #   - name: Set branch variables and generate benchmark_info.json
+    #     run: |
+    #       set -e
+    #       if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+    #         BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+    #         HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+    #         PR_NUMBER="${{ github.event.pull_request.number }}"
+    #       else
+    #         BASE_BRANCH="${{ steps.pr_info.outputs.base }}"
+    #         HEAD_BRANCH="${{ steps.pr_info.outputs.head }}"
+    #         PR_NUMBER="${{ github.event.issue.number }}"
+    #       fi
+    #       echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+    #       echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
+    #       echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
-      - name: Debug benchmark info
-        run: |
-          echo "DEBUG: BASE_BRANCH = $BASE_BRANCH"
-          echo "DEBUG: HEAD_BRANCH = $HEAD_BRANCH"
-          echo "DEBUG: PR_NUMBER = $PR_NUMBER"
-          echo "Contents of benchmark_info.json:"
-          cat benchmark_info.json
+    #       cat <<EOF > benchmark_info.json
+    #       {
+    #         "pr_number": "$PR_NUMBER",
+    #         "base_branch": "$BASE_BRANCH",
+    #         "head_branch": "$HEAD_BRANCH"
+    #       }
+    #       EOF
+    #       echo "Generated benchmark_info.json:"
+    #       cat benchmark_info.json
 
-      # Checkout the base (target) branch into a folder called "base"
-      # (temp directories, only exist for duration of workflow run)
-      - name: Checkout base branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.BASE_BRANCH }}
-          path: base
+    #   - name: Debug benchmark info
+    #     run: |
+    #       echo "DEBUG: BASE_BRANCH = $BASE_BRANCH"
+    #       echo "DEBUG: HEAD_BRANCH = $HEAD_BRANCH"
+    #       echo "DEBUG: PR_NUMBER = $PR_NUMBER"
+    #       echo "Contents of benchmark_info.json:"
+    #       cat benchmark_info.json
 
-      # Checkout the MERGED PR branch into a folder called "head"
-      - name: Checkout head branch (merged)
-        uses: actions/checkout@v4
-        with:
-          # this branch has everything on target branch at time event triggered with pr branch merged in
-          ref: refs/pull/${{ env.PR_NUMBER }}/merge
-          path: head
+    #   # Checkout the base (target) branch into a folder called "base"
+    #   # (temp directories, only exist for duration of workflow run)
+    #   - name: Checkout base branch
+    #     uses: actions/checkout@v4
+    #     with:
+    #       ref: ${{ env.BASE_BRANCH }}
+    #       path: base
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+    #   # Checkout the MERGED PR branch into a folder called "head"
+    #   - name: Checkout head branch (merged)
+    #     uses: actions/checkout@v4
+    #     with:
+    #       # this branch has everything on target branch at time event triggered with pr branch merged in
+    #       ref: refs/pull/${{ env.PR_NUMBER }}/merge
+    #       path: head
 
-      - name: Install pyperf
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyperf
+    #   - name: Set up Python
+    #     uses: actions/setup-python@v5
+    #     with:
+    #       python-version: '3.x'
 
-      # should run benchmarks simulataneously?
-      # these output files stored temporarily in the runner's workspace during the job's execution.
-      # Once the job completes, the files are removed.
-      - name: Run benchmark on base branch
-        working-directory: base
-        run: python benchmarks.py -o ../results-base.json
+    #   - name: Install pyperf
+    #     run: |
+    #       python -m pip install --upgrade pip
+    #       pip install pyperf
 
-      - name: Run benchmark on head branch
-        working-directory: head
-        run: python benchmarks.py -o ../results-head.json
+    #   # should run benchmarks simulataneously?
+    #   # these output files stored temporarily in the runner's workspace during the job's execution.
+    #   # Once the job completes, the files are removed.
+    #   - name: Run benchmark on base branch
+    #     working-directory: base
+    #     run: python benchmarks.py -o ../results-base.json
 
-      - name: Compare benchmarks
-        run: python -m pyperf compare_to results-base.json results-head.json --table --table-format=md > comparison.txt
+    #   - name: Run benchmark on head branch
+    #     working-directory: head
+    #     run: python benchmarks.py -o ../results-head.json
 
-      - name: Upload benchmark artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-results
-          path: |
-            comparison.txt
-            benchmark_info.json
+    #   - name: Compare benchmarks
+    #     run: python -m pyperf compare_to results-base.json results-head.json --table --table-format=md > comparison.txt
+
+    #   - name: Upload benchmark artifact
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: benchmark-results
+    #       path: |
+    #         comparison.txt
+    #         benchmark_info.json
