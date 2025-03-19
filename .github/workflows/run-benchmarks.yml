@@ -36,12 +36,11 @@ jobs:
     needs: check-permission
     runs-on: ubuntu-latest
     permissions:
-        issues: write
+        pull-requests: write
     steps:
       - name: Benchmarks Started Comment
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const commentId = context.payload.comment.id;
             const originalBody = context.payload.comment.body;
