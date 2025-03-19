@@ -82,7 +82,7 @@ jobs:
         run: |
           echo "COMPARE_BRANCH: $COMPARE_BRANCH"
           echo "BASE_BRANCH: $BASE_BRANCH"
-        #   echo "PR_NUMBER: $PR_NUMBER"
+        #   echo "PR_NUMBER: $PR_NUMBER"d
 
       - name: Checkout base branch
         uses: actions/checkout@v4
