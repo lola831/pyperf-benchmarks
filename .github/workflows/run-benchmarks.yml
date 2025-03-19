@@ -76,13 +76,11 @@ jobs:
           else
             echo "COMPARE_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
           fi
-        #   echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
 
       - name: Print PR Details
         run: |
           echo "COMPARE_BRANCH: $COMPARE_BRANCH"
           echo "BASE_BRANCH: $BASE_BRANCH"
-        #   echo "PR_NUMBER: $PR_NUMBER"
 
       - name: Checkout base branch
         uses: actions/checkout@v4
@@ -109,16 +107,16 @@ jobs:
       # should run benchmarks simulataneously?
       - name: Run benchmark on base branch
         working-directory: base
-        run: python benchmarks.py -o ../results-base.json
+        run: python benchmarks.py -o ../base.json
 
       - name: Run benchmark on compare branch
         working-directory: compare
-        run: python benchmarks.py -o ../results-compare.json
+        run: python benchmarks.py -o ../head.json
 
       - name: Compare benchmarks results
         id: compare
         run: |
-          RESULTS=$(python -m pyperf compare_to --table --table-format=md results-base.json results-compare.json)
+          RESULTS=$(python -m pyperf compare_to --table --table-format=md base.json head.json)
           echo "Benchmark comparison results:"
           echo "$RESULTS"
           # Store the multi-line results in $GITHUB_OUTPUT using heredoc syntax:
