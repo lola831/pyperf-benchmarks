@@ -60,3 +60,27 @@ jobs:
               comment_id: commentId,
               body: newBody,
             });
+
+      - name: Fetch PR Details
+        id: pr_info
+        uses: actions/github-script@v7
+        with:
+            script: |
+              const pr = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              core.setOutput('head', pr.data.head.ref)
+              core.setOutput('base', pr.data.base.ref)
+
+    #   - name: Set branch variables and generate benchmark_info.json
+    #     run: |
+    #       set -e
+    #       BASE_BRANCH="${{ steps.pr_info.outputs.base }}"
+    #       HEAD_BRANCH="${{ steps.pr_info.outputs.head }}"
+    #       PR_NUMBER="${{ github.event.issue.number }}"
+    #             fi
+    #             echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+    #             echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
+    #             echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
