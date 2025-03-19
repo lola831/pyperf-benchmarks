@@ -2,7 +2,7 @@ import pyperf
 import functools
 
 def quick_benchmark(n):
-    return sum(range(n))
+    return sum(range(n * 1000))
 
 def benchmark_functions():
     runner = pyperf.Runner()
