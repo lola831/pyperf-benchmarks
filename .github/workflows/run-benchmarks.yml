@@ -70,19 +70,11 @@ jobs:
               core.setOutput('head', pr.data.head.ref)
               core.setOutput('mergeable', pr.data.mergeable)
 
-    #   - name: Set PR Details to Environment Variables
-    #     run: |
-    #       echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
-    #       if [ "${{ steps.pr_info.outputs.mergeable }}" = "true" ]; then
-    #         echo "COMPARE_BRANCH=refs/pull/${{ github.event.issue.number }}/merge" >> $GITHUB_ENV
-    #       else
-    #         echo "COMPARE_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
-    #       fi
       - name: Set PR Details Securely
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs'); 
+            const fs = require('fs');
             const baseRaw = "${{ steps.pr_info.outputs.base }}";
             const headRaw = "${{ steps.pr_info.outputs.head }}";
             const mergeableRaw = "${{ steps.pr_info.outputs.mergeable }}";
