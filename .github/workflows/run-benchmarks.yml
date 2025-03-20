@@ -83,7 +83,7 @@ jobs:
             const head = JSON.stringify(headRaw).slice(1, -1);
             const mergeable = JSON.stringify(mergeableRaw).slice(1, -1);
             const compareBranch = (mergeable === "true") ? `refs/pull/${prNumber}/merge` : head;
-                fs.appendFileSync(process.env.GITHUB_ENV, `BASE_BRANCH=${base}\n`);
+            fs.appendFileSync(process.env.GITHUB_ENV, `BASE_BRANCH=${base}\n`);
             fs.appendFileSync(process.env.GITHUB_ENV, `COMPARE_BRANCH=${compareBranch}\n`);
             console.log(`BASE_BRANCH set to: ${base}`);
             console.log(`COMPARE_BRANCH set to: ${compareBranch}`);
