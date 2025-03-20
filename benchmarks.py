@@ -2,7 +2,7 @@ import pyperf
 import functools
 
 def quick_benchmark(n):
-    return sum(range(n)) + 42
+    return sum(range(n*20))
 
 def benchmark_functions():
     runner = pyperf.Runner()
