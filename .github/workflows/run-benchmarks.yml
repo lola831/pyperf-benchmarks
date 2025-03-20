@@ -124,10 +124,6 @@ jobs:
           echo "Comparison results:"
           cat comparison.txt
 
-      - name: Set benchmark results environment variable
-        run: |
-          echo "BENCH_RESULT=${{ steps.compare.outputs.RESULTS }}" >> $GITHUB_ENV
-
       - name: Post benchmark results
         uses: actions/github-script@v7
         with:
