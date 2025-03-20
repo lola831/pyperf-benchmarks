@@ -47,7 +47,7 @@ jobs:
             const commentId = context.payload.comment.id;
             const originalBody = context.payload.comment.body;
             // Append a message to indicate benchmarks have started running
-            const newBody = `${originalBody}\n\n🚀 Benchmarks have started running...`;
+            const newBody = `${originalBody}\n\n🚀 Benchmarks are running...`;
             // Update the comment with the new body text
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
