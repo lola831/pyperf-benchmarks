@@ -70,19 +70,35 @@ jobs:
               core.setOutput('head', pr.data.head.ref)
               core.setOutput('mergeable', pr.data.mergeable)
 
-      - name: Set PR Details to Environment Variables
-        run: |
-          echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
-          if [ "${{ steps.pr_info.outputs.mergeable }}" = "true" ]; then
-            echo "COMPARE_BRANCH=refs/pull/${{ github.event.issue.number }}/merge" >> $GITHUB_ENV
-          else
-            echo "COMPARE_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
-          fi
-
-    #   - name: Print PR Details
+    #   - name: Set PR Details to Environment Variables
     #     run: |
-    #       echo "COMPARE_BRANCH: $COMPARE_BRANCH"
-    #       echo "BASE_BRANCH: $BASE_BRANCH"
+    #       echo "BASE_BRANCH=${{ steps.pr_info.outputs.base }}" >> $GITHUB_ENV
+    #       if [ "${{ steps.pr_info.outputs.mergeable }}" = "true" ]; then
+    #         echo "COMPARE_BRANCH=refs/pull/${{ github.event.issue.number }}/merge" >> $GITHUB_ENV
+    #       else
+    #         echo "COMPARE_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
+    #       fi
+      - name: Set PR Details Securely
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const baseRaw = "${{ steps.pr_info.outputs.base }}";
+            const headRaw = "${{ steps.pr_info.outputs.head }}";
+            const mergeableRaw = "${{ steps.pr_info.outputs.mergeable }}";
+            const prNumber = "${{ github.event.issue.number }}";
+            const base = JSON.stringify(baseRaw).slice(1, -1);
+            const head = JSON.stringify(headRaw).slice(1, -1);
+            const mergeable = JSON.stringify(mergeableRaw).slice(1, -1);
+            const compareBranch = (mergeable === "true") ? `refs/pull/${prNumber}/merge` : head;
+                fs.appendFileSync(process.env.GITHUB_ENV, `BASE_BRANCH=${base}\n`);
+            fs.appendFileSync(process.env.GITHUB_ENV, `COMPARE_BRANCH=${compareBranch}\n`);
+            console.log(`BASE_BRANCH set to: ${base}`);
+            console.log(`COMPARE_BRANCH set to: ${compareBranch}`);
+
+      - name: Print PR Details
+        run: |
+          echo "COMPARE_BRANCH: $COMPARE_BRANCH"
+          echo "BASE_BRANCH: $BASE_BRANCH"
 
       - name: Checkout base branch
         uses: actions/checkout@v4
