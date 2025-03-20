@@ -2,12 +2,12 @@ import pyperf
 import functools
 
 def quick_benchmark(n):
-    return sum(range(n * 1))
+    return sum(range(n))
 
 def benchmark_functions():
     runner = pyperf.Runner()
     runner.bench_func(
-        "quick_benchmark(n=3)",
+        "quick_benchmark",
         functools.partial(quick_benchmark, n=3)
     )
 
