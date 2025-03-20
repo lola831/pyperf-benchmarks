@@ -120,13 +120,9 @@ jobs:
       - name: Compare benchmarks results
         id: compare
         run: |
-          RESULTS=$(python -m pyperf compare_to --table --table-format=md base.json head.json)
-          echo "Benchmark comparison results:"
-          echo "$RESULTS"
-          # Store the multi-line results in $GITHUB_OUTPUT using heredoc syntax:
-          echo "RESULTS<<EOF" >> $GITHUB_OUTPUT
-          echo "$RESULTS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          python -m pyperf compare_to --table --table-format=md base.json head.json > comparison.txt
+          echo "Comparison results:"
+          cat comparison.txt
 
       - name: Set benchmark results environment variable
         run: |
@@ -136,8 +132,9 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const fs = require('fs');
+            const result = fs.readFileSync('comparison.txt', 'utf8');
             const commentId = context.payload.comment.id;
-            const result = process.env.BENCH_RESULT;
             const newBody = `🚀 Benchmarks completed.\n\n${result}`;
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
