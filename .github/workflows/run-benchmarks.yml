@@ -77,22 +77,24 @@ jobs:
             echo "COMPARE_BRANCH=${{ steps.pr_info.outputs.head }}" >> $GITHUB_ENV
           fi
 
-      - name: Print PR Details
-        run: |
-          echo "COMPARE_BRANCH: $COMPARE_BRANCH"
-          echo "BASE_BRANCH: $BASE_BRANCH"
+    #   - name: Print PR Details
+    #     run: |
+    #       echo "COMPARE_BRANCH: $COMPARE_BRANCH"
+    #       echo "BASE_BRANCH: $BASE_BRANCH"
 
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
           ref: ${{ env.BASE_BRANCH }}
           path: base
+          persist-credentials: false
 
       - name: Checkout compare branch
         uses: actions/checkout@v4
         with:
           ref: ${{ env.COMPARE_BRANCH }}
           path: compare
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
