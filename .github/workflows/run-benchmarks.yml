@@ -7,6 +7,8 @@ on:
 jobs:
   check-permission:
     runs-on: ubuntu-latest
+    permissions:
+        contents: read
     if: >
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, 'run benchmarks')
