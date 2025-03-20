@@ -7,13 +7,12 @@ on:
 jobs:
   check-permission:
     runs-on: ubuntu-latest
+    permissions:
+        contents: none
     if: >
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, 'run benchmarks')
     steps:
-      - name: Print event payload
-        run: cat $GITHUB_EVENT_PATH
-
       - name: Check user's permission level
         uses: actions/github-script@v7
         with:
