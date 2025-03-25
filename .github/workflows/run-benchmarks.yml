@@ -23,11 +23,11 @@ jobs:
               repo: context.repo.repo,
               username: username,
             });
-            const perm = data.permission;
-            // remove console.log ---------------------- !!!!!!!
-            console.log(`User ${username} has permission: ${perm}`);
-            // Fail the job if the permission is not admin or write
-            if (perm !== 'admin') {
+            const userRole = data.role_name;
+            const allowedRoles = ["admin", "write", "maintain", "triage"];
+            console.log(`User ${username} has role: ${userRole}`);
+            // Fail the job if user doesn't have allowed role
+            if (!allowedRoles.includes(userRole)) {
               throw new Error(`User does not have sufficient permissions to run the benchmarks.`);
             }
 
