@@ -1,10 +1,13 @@
 name: Weekly CI tests
 
+permissions:
+  contents: read
+
 # Trigger every Thursday at 9:00 AM Pacific Time (16:00 UTC)
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '57 17 * * 3'
+    - cron: '30 18 * * 3'
 
 jobs:
   run-tests:
