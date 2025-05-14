@@ -1,7 +1,7 @@
 name: Weekly CI tests
 
-permissions:
-  contents: read
+# No permissions needed
+permissions: {}
 
 # Trigger every Thursday at 9:00 AM Pacific Time (16:00 UTC)
 on:
