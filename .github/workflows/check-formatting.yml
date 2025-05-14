@@ -1,0 +1,27 @@
+name: format
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Install formatting tools
+        run: |
+          pip install black isort
+
+      - name: Check Black formatting
+        run: |
+          black --check .
+
+      - name: Check import order (isort)
+        run: |
+          isort --check-only .
