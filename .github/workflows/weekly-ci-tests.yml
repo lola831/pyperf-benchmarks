@@ -7,7 +7,7 @@ permissions: {}
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '34 22 * * 3'
+    - cron: '39 22 * * 3'
 
 jobs:
   run-tests:
@@ -28,6 +28,8 @@ jobs:
         - name: Post result to Slack
           uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
           with:
+            webhook: ${{ secrets.SLACK_WEBHOOK_URL}}
+            webhook-type: incoming-webhook
             payload: |
               {
                 "text": ":hourglass_flowing_sand: *Weekly CI tests completed*",
@@ -48,5 +50,3 @@ jobs:
                   }
                 ]
               }
-          env:
-            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
