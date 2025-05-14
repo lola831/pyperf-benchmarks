@@ -4,7 +4,7 @@ name: Weekly CI tests
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '40 17 * * 3'
+    - cron: '57 17 * * 3'
 
 jobs:
   run-tests:
@@ -14,4 +14,4 @@ jobs:
       # Use the default branch" (i.e. main)
       ref: ''
     # Make sure the same tokens/secrets are passed through
-    secrets: inherit
+    # secrets: inherit

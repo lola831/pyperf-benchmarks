@@ -6,10 +6,10 @@ on:
         ref:
             description: Git ref on which to run the tests.
             type: string
-        options:
-            description: Options to pass to pytest.
-            default: --no-graphics
-            type: string
+        # options:
+        #     description: Options to pass to pytest.
+        #     default: --no-graphics
+        #     type: string
 
 jobs:
   check-format:
@@ -50,4 +50,4 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest ${{ inputs.options }}
+          pytest
