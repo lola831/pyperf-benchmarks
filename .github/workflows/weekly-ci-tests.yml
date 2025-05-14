@@ -7,7 +7,7 @@ permissions: {}
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '30 18 * * 3'
+    - cron: '17 22 * * 3'
 
 jobs:
   run-tests:
@@ -18,3 +18,35 @@ jobs:
       ref: ''
     # Make sure the same tokens/secrets are passed through
     # secrets: inherit
+
+  notify:
+    name: Notify Slack
+    needs: run-tests
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Post result to Slack
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": ":hourglass_flowing_sand: *Weekly CI tests completed*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Weekly CI tests* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|run #${{ github.run_number }}> finished."
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ${{ needs.run-tests.conclusion == 'success' && '✅ All tests passed!' || '🚨 Some tests failed!' }}
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
