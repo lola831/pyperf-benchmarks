@@ -4,7 +4,7 @@ name: Weekly CI tests
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '30 17 * * 3'
+    - cron: '40 17 * * 3'
 
 jobs:
   run-tests:

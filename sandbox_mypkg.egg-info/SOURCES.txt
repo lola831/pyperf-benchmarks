@@ -1,0 +1,8 @@
+pyproject.toml
+setup.cfg
+sandbox_mypkg.egg-info/PKG-INFO
+sandbox_mypkg.egg-info/SOURCES.txt
+sandbox_mypkg.egg-info/dependency_links.txt
+sandbox_mypkg.egg-info/requires.txt
+sandbox_mypkg.egg-info/top_level.txt
+tests/test_example.py
