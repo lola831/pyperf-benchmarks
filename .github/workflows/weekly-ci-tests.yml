@@ -7,7 +7,7 @@ permissions: {}
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '39 22 * * 3'
+    - cron: '30 2 * * 3'
 
 jobs:
   run-tests:
