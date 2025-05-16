@@ -7,7 +7,7 @@ permissions: {}
 on:
   schedule:
     # - cron: '0 16 * * 4'
-    - cron: '55 16 * * 5'
+    - cron: '15 17 * * 5'
 
 jobs:
   run-tests:
@@ -33,18 +33,11 @@ jobs:
             payload: |
               {
                 "blocks": [
-                  {
-                    "type": "header",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "Weekly CI tests completed"
-                    }
-                  },
-                  {
+                    {
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|run #${{ github.run_number }}>"
+                      "text": "*Weekly CI tests* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|run #${{ github.run_number }}> finished."
                     }
                   },
                   {
